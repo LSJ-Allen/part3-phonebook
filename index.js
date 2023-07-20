@@ -1,6 +1,33 @@
 const express = require('express')
+const morgan = require('morgan')
 const app = express()
 app.use(express.json())
+
+// morgan middleware
+app.use(morgan((tokens, req, res) => {
+    const reqType = tokens.method(req, res)
+
+    // the return string is different if request type is post
+    if(reqType.localeCompare("POST")===0){
+        return [
+            tokens.method(req, res),
+            tokens.url(req, res),
+            tokens.status(req, res),
+            tokens.res(req, res, 'content-length', '-'),
+            tokens['response-time'](req, res), 'ms',
+            JSON.stringify(req.body)
+        ].join(' ')
+    } else{
+        return [
+            tokens.method(req, res),
+            tokens.url(req, res),
+            tokens.status(req, res),
+            tokens.res(req, res, 'content-length', '-'),
+            tokens['response-time'](req, res), 'ms'
+        ].join(' ')
+    }
+}))
+
 let persons = [
     { 
       "id": 1,
@@ -74,7 +101,7 @@ app.post('/api/persons', (req, res) => {
     }
 
     // check if there is a repetition in names
-    const sameName = persons.filter(p => p.name.localeCompare(name))
+    const sameName = persons.filter(p => p.name.localeCompare(name)===0)
     if(sameName.length !== 0){
         return res.status(409).json({
             error: 'name must be unique'
