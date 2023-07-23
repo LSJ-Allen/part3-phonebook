@@ -1,8 +1,10 @@
 const express = require('express')
 const morgan = require('morgan')
+const cors = require('cors')
 const app = express()
-app.use(express.json())
 
+app.use(express.json())
+app.use(cors())
 // morgan middleware
 app.use(morgan((tokens, req, res) => {
     const reqType = tokens.method(req, res)
